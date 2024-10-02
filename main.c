@@ -2,11 +2,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "ctrl_regs.h"
+
 int main (){
 
-  int *ptr;
+  short *ptr;
+  short *rd_ptr;
+  short *wr_ptr;
 
-  ptr = (int*)malloc(1000);
+  ptr = (short*)malloc(64);
+
+  IOWR_CONTROL_REG              (ptr,CONTROL_REG_IRE(1));
+  IOWR_RT_MSG_PTR_TABLE_ADDR_REG(ptr,RT_MSG_PTR_TABLE_ADDR(0x12345678));
+  IOWR_BASIC_STATUS_REG         (ptr,BASIC_STATUS_REG_RT_ADDR(21));
+
+  rd_ptr = ptr;
+  printf("After any modifying!\n");
+  for(int i = 0; i < 32; i++){
+    printf("%d: 0x%hX\n",i,*rd_ptr++);
+  }
 
   return 0;
 }

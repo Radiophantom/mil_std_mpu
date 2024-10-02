@@ -2,17 +2,33 @@
 #ifndef __CONTROL_REGS_H__
 #define __CONTROL_REGS_H__
 
-#define BASE_OFFSET
+#define IORD(base,addr)       (*(short*)(base+addr))
+#define IOWR(base,addr,data)  (*(short*)(base+addr) = data)
 
-#define IORD(base,reg_addr)       (*(short unsigned*)(base+reg_addr))
-#define IOWR(base,reg_addr,data)  (*(short unsigned*)(base+reg_addr) = data)
+#define _CALC_BITS(data,mask,offset)  ((data & mask) << offset)
 
-#define CONTROL_REG                             0
-#define IORD_CONTROL_REG        IORD(BASE_OFFSET,CONTROL_REG)
-#define IOWR_CONTROL_REG(data)  IOWR(BASE_OFFSET,CONTROL_REG,data)
+#define CONTROL_REG                               0
+#define IORD_CONTROL_REG(base)                    IORD(base,CONTROL_REG)
+#define IOWR_CONTROL_REG(base,data)               IOWR(base,CONTROL_REG,data)
+#define CONTROL_REG_IRE_MASK                      (0x1)
+#define CONTROL_REG_IRE_OFST                      (7)
+#define CONTROL_REG_IRE(data)                      _CALC_BITS(data,CONTROL_REG_IRE_MASK,CONTROL_REG_IRE_OFST)
 
-#define RT_MSG_PTR_TABLE_ADDR_REG               1
-#define BASIC_STATUS_REG                        2
+#define RT_MSG_PTR_TABLE_ADDR_REG                 1
+#define IORD_RT_MSG_PTR_TABLE_ADDR_REG(base)      IORD(base,RT_MSG_PTR_TABLE_ADDR_REG)
+#define IOWR_RT_MSG_PTR_TABLE_ADDR_REG(base,data) IOWR(base,RT_MSG_PTR_TABLE_ADDR_REG,data)
+#define RT_MSG_PTR_TABLE_ADDR_MASK                (0xFFFF)
+#define RT_MSG_PTR_TABLE_ADDR_OFST                (0)
+#define RT_MSG_PTR_TABLE_ADDR(data)               _CALC_BITS(data,RT_MSG_PTR_TABLE_ADDR_MASK,RT_MSG_PTR_TABLE_ADDR_OFST)
+
+#define BASIC_STATUS_REG                          2
+#define IORD_BASIC_STATUS_REG(base)               IORD(base,BASIC_STATUS_REG)
+#define IOWR_BASIC_STATUS_REG(base,data)          IOWR(base,BASIC_STATUS_REG,data)
+#define BASIC_STATUS_REG_RT_ADDR_MASK             (0x1F)
+#define BASIC_STATUS_REG_RT_ADDR_OFST             (11)
+#define BASIC_STATUS_REG_RT_ADDR(data)            _CALC_BITS(data,BASIC_STATUS_REG_RT_ADDR_MASK,BASIC_STATUS_REG_RT_ADDR_OFST)
+
+/*
 #define INTERRUPT_MASKL_REG                     3
 #define INTERRUPT_VECTORH_REG                   3
 #define INTERRUPT_REQUESTH_REG                  3
@@ -130,6 +146,7 @@
 #define IO_WR_RT_LOG_PTR_TABLE_ADDR_REG(data)               *(short unsigned *)(RT_LOG_PTR_TABLE_ADDR_REG           ) = data
 #define IO_WR_EXTERNAL_RTU_ADDR_BUFL_REG(data)              *(short unsigned *)(EXTERNAL_RTU_ADDR_BUFL_REG          ) = data
 #define IO_WR_BC_MU_IRQ_VECTOR_REG(data)                    *(short unsigned *)(BC_MU_IRQ_VECTOR_REG                ) = data
+*/
 
 #endif
 
