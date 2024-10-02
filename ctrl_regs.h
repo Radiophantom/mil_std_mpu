@@ -1,5 +1,16 @@
 
+#ifndef __CONTROL_REGS_H__
+#define __CONTROL_REGS_H__
+
+#define BASE_OFFSET
+
+#define IORD(base,reg_addr)       (*(short unsigned*)(base+reg_addr))
+#define IOWR(base,reg_addr,data)  (*(short unsigned*)(base+reg_addr) = data)
+
 #define CONTROL_REG                             0
+#define IORD_CONTROL_REG        IORD(BASE_OFFSET,CONTROL_REG)
+#define IOWR_CONTROL_REG(data)  IOWR(BASE_OFFSET,CONTROL_REG,data)
+
 #define RT_MSG_PTR_TABLE_ADDR_REG               1
 #define BASIC_STATUS_REG                        2
 #define INTERRUPT_MASKL_REG                     3
@@ -119,4 +130,6 @@
 #define IO_WR_RT_LOG_PTR_TABLE_ADDR_REG(data)               *(short unsigned *)(RT_LOG_PTR_TABLE_ADDR_REG           ) = data
 #define IO_WR_EXTERNAL_RTU_ADDR_BUFL_REG(data)              *(short unsigned *)(EXTERNAL_RTU_ADDR_BUFL_REG          ) = data
 #define IO_WR_BC_MU_IRQ_VECTOR_REG(data)                    *(short unsigned *)(BC_MU_IRQ_VECTOR_REG                ) = data
+
+#endif
 
