@@ -2,31 +2,35 @@
 #ifndef __CONTROL_REGS_H__
 #define __CONTROL_REGS_H__
 
-#define IORD(base,addr)       (*(short*)(base+addr))
-#define IOWR(base,addr,data)  (*(short*)(base+addr) = data)
+#define IORD(base,addr)       (*(unsigned short*)(base+addr))
+#define IOWR(base,addr,data)  (*(unsigned short*)(base+addr) = data)
 
-#define _CALC_BITS(data,mask,offset)  ((data & mask) << offset)
+#define _SET_BITS(data,mask,offset)  ((data & mask) << offset)
+#define _GET_BITS(data,mask,offset)  ((data >> offset) & mask)
 
 #define CONTROL_REG                               0
 #define IORD_CONTROL_REG(base)                    IORD(base,CONTROL_REG)
 #define IOWR_CONTROL_REG(base,data)               IOWR(base,CONTROL_REG,data)
 #define CONTROL_REG_IRE_MASK                      (0x1)
 #define CONTROL_REG_IRE_OFST                      (7)
-#define CONTROL_REG_IRE(data)                      _CALC_BITS(data,CONTROL_REG_IRE_MASK,CONTROL_REG_IRE_OFST)
+#define CONTROL_REG_IRE_SET(data)                 _SET_BITS(data,CONTROL_REG_IRE_MASK,CONTROL_REG_IRE_OFST)
+#define CONTROL_REG_IRE_GET(data)                 _GET_BITS(data,CONTROL_REG_IRE_MASK,CONTROL_REG_IRE_OFST)
 
 #define RT_MSG_PTR_TABLE_ADDR_REG                 1
 #define IORD_RT_MSG_PTR_TABLE_ADDR_REG(base)      IORD(base,RT_MSG_PTR_TABLE_ADDR_REG)
 #define IOWR_RT_MSG_PTR_TABLE_ADDR_REG(base,data) IOWR(base,RT_MSG_PTR_TABLE_ADDR_REG,data)
 #define RT_MSG_PTR_TABLE_ADDR_MASK                (0xFFFF)
 #define RT_MSG_PTR_TABLE_ADDR_OFST                (0)
-#define RT_MSG_PTR_TABLE_ADDR(data)               _CALC_BITS(data,RT_MSG_PTR_TABLE_ADDR_MASK,RT_MSG_PTR_TABLE_ADDR_OFST)
+#define RT_MSG_PTR_TABLE_ADDR_SET(data)           _SET_BITS(data,RT_MSG_PTR_TABLE_ADDR_MASK,RT_MSG_PTR_TABLE_ADDR_OFST)
+#define RT_MSG_PTR_TABLE_ADDR_GET(data)           _GET_BITS(data,RT_MSG_PTR_TABLE_ADDR_MASK,RT_MSG_PTR_TABLE_ADDR_OFST)
 
 #define BASIC_STATUS_REG                          2
 #define IORD_BASIC_STATUS_REG(base)               IORD(base,BASIC_STATUS_REG)
 #define IOWR_BASIC_STATUS_REG(base,data)          IOWR(base,BASIC_STATUS_REG,data)
 #define BASIC_STATUS_REG_RT_ADDR_MASK             (0x1F)
 #define BASIC_STATUS_REG_RT_ADDR_OFST             (11)
-#define BASIC_STATUS_REG_RT_ADDR(data)            _CALC_BITS(data,BASIC_STATUS_REG_RT_ADDR_MASK,BASIC_STATUS_REG_RT_ADDR_OFST)
+#define BASIC_STATUS_REG_RT_ADDR_SET(data)        _SET_BITS(data,BASIC_STATUS_REG_RT_ADDR_MASK,BASIC_STATUS_REG_RT_ADDR_OFST)
+#define BASIC_STATUS_REG_RT_ADDR_GET(data)        _GET_BITS(data,BASIC_STATUS_REG_RT_ADDR_MASK,BASIC_STATUS_REG_RT_ADDR_OFST)
 
 /*
 #define INTERRUPT_MASKL_REG                     3
