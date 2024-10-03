@@ -1,6 +1,6 @@
 
-#ifndef __PROC_H__
-#define __PROC_H__
+#ifndef __RECEIVE_PROC_H__
+#define __RECEIVE_PROC_H__
 
 #include "ctrl_regs.h"
 
@@ -11,35 +11,26 @@
 #define TRANSMIT_MSG  1
 
 typedef struct {
+  unsigned short  sync;
+  unsigned short  data;
+  unsigned short  timestampl;
+  unsigned short  timestamph;
+  unsigned short  errors;
+} rx_msg_regs_t;
+
+typedef struct {
   unsigned char   msg_type;
-  unsigned short  msg_data;
-  unsigned int    msg_timestamp;
-  unsigned char   msg_errors; // 0 bit - parity error
-} rx_msg_info_t;
-
-typedef struct {
   unsigned char   rt_address;
-  unsigned char   cmd; // 0 - RECEIVE, 1 - TRANSMIT
+  unsigned char   cmd;
   unsigned char   sub_address;
-  unsigned char   words_cnt;
-} cmd_data_t;
-
-typedef struct {
-  unsigned char   rt_address;
-  unsigned char   msg_error;
-  //unsigned char   instr_bit;
-  //unsigned char   service_req;
-  unsigned char   bcst_rcvd;
-  //unsigned char   busy;
-  //unsigned char   subsys_flag;
-  //unsigned char   dyn_bus_accept;
-  //unsigned char   terminal_flag;
-} stat_data_t;
-
-typedef struct {
-  unsigned char   msg_type; // 0 - COMMAND, 1 - DATA
-  unsigned short  msg_data;
-} tx_msg_info_t;
+  unsigned char   word_count;
+  unsigned char   broadcast;
+  unsigned char   unicast;
+  unsigned char   mode_code;
+  unsigned short  data;
+  unsigned int    timestamp;
+  unsigned char   errors;
+} cmd_word_t;
 
 // (rt_address == 0-30)  - Unique addr
 // (rt_address == 31)    - Broadcast addr
@@ -72,25 +63,25 @@ void msg_processor(){
 
   while(1){
 
-    receive_word(rx_msg_info);
+    receive_word(&rx_msg_info);
 
-    if(msg_info.cmd == RECEIVE_MSG){
+    if(rx_msg_info.cmd == RECEIVE_MSG){
       // Receive command
       if(msg_info.mode_code){
         // Mode code command
         if(msg_info.word_count >> 4){
-          receive_word();
+          receive_word(&rx_msg_info);
         }
       } else {
         // Receive data command
-        receive_word();
+        receive_word(&rx_msg_info);
         if(msg_info.cmd == TRANSMIT_MSG){
           // RT - RT transaction
-          receive_word();
+          receive_word(&rx_msg_info);
         }
         unsigned char word_cnt = (msg_info.word_cnt == 0) ? 32 : msg_info.word_cnt;
         while(word_cnt){
-          receive_word();
+          receive_word(&rx_msg_info);
           word_cnt--;
         }
       }
@@ -116,26 +107,38 @@ void msg_processor(){
     }
 }
 
-void receive_word(rx_msg_info_t* msg_info){
-  unsigned short sync_reg;
-  unsigned short data_reg;
-  unsigned short timestamp_regl;
-  unsigned short timestamp_regh;
-  unsigned short error_reg;
-
-  // Polling of RCV message valid
+void wait_rx_msg(){
   while(RX_VALID == 0){
   }
+}
 
-  sync_reg      = *(RD_SYNC);
-  data_reg      = *(RD_DATA);
-  timestamp_reg = *(RD_TIMESTAMP);
-  error_reg     = *(RD_ERROR);
+void receive_word(rx_msg_info_t* msg_info){
 
-  msg_info -> msg_type      = _GET_BITS(sync_reg,0x1,0);
-  msg_info -> msg_data      = data_reg;
-  msg_info -> msg_timestamp = (timestamp_regh << 16) | timestamp_regl;
-  msg_info -> msg_errors    = error_reg;
+  rx_msg_regs_t rx_msg_regs;
+  cmd_word_t    cmd_word;
+
+  // Polling 'RCV_VALID' bit
+  wait_rx_msg();
+
+  // Read 'RCV_MSG' registers
+  rx_msg_regs.sync        = *(RD_SYNC);
+  rx_msg_regs.data        = *(RD_DATA);
+  rx_msg_regs.timestampl  = *(RD_TIMESTAMPL);
+  rx_msg_regs.timestamph  = *(RD_TIMESTAMPH);
+  rx_msg_regs.errors      = *(RD_ERROR);
+
+  // Parse received message
+  cmd_word.msg_type     = rx_msg_regs.sync;
+  cmd_word.rt_address   = _GET_BITS(rx_msg_regs.data,0x1F,11);
+  cmd_word.cmd          = _GET_BITS(rx_msg_regs.data,0x1,10);
+  cmd_word.sub_address  = _GET_BITS(rx_msg_regs.data,0x1F,5);
+  cmd_word.word_count   = _GET_BITS(rx_msg_regs.data,0x1F,0);
+  cmd_word.broadcast    = (cmd_word.rt_address == 31);
+  cmd_word.unicast      = (cmd_word.rt_address == *(RD_RT_ADDR)); // TODO: Check not to config 31 addr to be unicast!
+  cmd_word.mode_code    = (cmd_word.sub_addr == 0) || (cmd_word.sub_addr == 31);
+  cmd_word.data         = rx_msg_regs.data;
+  cmd_word.timestamp    = (rx_msg_regs.timestamph << 16) | rx_msg_regs.timestampl;
+  cmd_word.errors       = rx_msg_regs.errors;
 }
 
 void mode_code_error(msg_info_t* msg_info){
