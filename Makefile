@@ -1,12 +1,12 @@
 
-CFLAGS=-I.
+CFLAGS=-c -Wall -I./inc
 OBJ=main.o
 
 main_app: $(OBJ)
-	gcc -o $@ $^ $(CFLAGS)
+	gcc $^ -o $@
 
-%.o: %.c %.h
-	gcc -c -o $@ $< $(CFLAGS)
+main.o: src/main.c
+	gcc -c $^ -o $@ $(CFLAGS)
 
 clean:
 	rm *.o
