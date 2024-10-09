@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #include "ctrl_regs.h"
-#include "rcv.h"
+#include "mil_std.h"
 
 int main (){
 
@@ -12,9 +12,7 @@ int main (){
   // ENABLE RECEIVER AND TRANSMITTER
 
   // START MESSAGE PROCESSOR UNIT
-  //rt_msg_processor();
-
-  printf("0x%d\n",RCV_CONTROL_REG_ENABLE_GET(0));
+  rt_msg_processor();
 
   return 0;
 }

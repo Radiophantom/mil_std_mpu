@@ -30,27 +30,27 @@ void rt_msg_processor(){
 
     receive_word(rx_msg_info);
 
-    if(msg_info.cmd == RECEIVE_MSG){
+    if(rx_msg_info.cmd == 0){
       // Receive command
-      if(msg_info.mode_code){
+      if(rx_msg_info.mode_code){
         // Mode code command
-        if(msg_info.word_count >> 4){
+        if(rx_msg_info.mode_code_wdata){
           receive_word();
         }
       } else {
         // Receive data command
         receive_word();
-        if(msg_info.cmd == TRANSMIT_MSG){
+        if(rx_msg_info.cmd == 1){
           // RT - RT transaction
           receive_word();
         }
-        unsigned char word_cnt = (msg_info.word_cnt == 0) ? 32 : msg_info.word_cnt;
+        unsigned char word_cnt = (rx_msg_info.word_cnt == 0) ? 32 : rx_msg_info.word_cnt;
         while(word_cnt){
           receive_word();
           word_cnt--;
         }
       }
-      if(msg_info.broadcast){
+      if(rx_msg_info.broadcast){
         // SKIP status word
       } else {
         wait_gap();
@@ -60,10 +60,10 @@ void rt_msg_processor(){
       // Transmit command
       wait_gap();
       send_status_word();
-      if(msg_info.mode_code){
+      if(rx_msg_info.mode_code){
         transmit_word();
       } else {
-        unsigned char word_cnt = (msg_info.word_cnt == 0) ? 32 : msg_info.word_cnt;
+        unsigned char word_cnt = (rx_msg_info.word_cnt == 0) ? 32 : rx_msg_info.word_cnt;
         while(word_cnt){
           transmit_word();
           word_cnt--;

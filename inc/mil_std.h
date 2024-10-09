@@ -1,11 +1,11 @@
 
-#ifndef __RCV_H__
-#define __RCV_H__
+#ifndef __MIL_STD_H__
+#define __MIL_STD_H__
 
 #include "ctrl_regs.h"
 
 // RW
-#define RCV_CONTROL_                      0
+#define RCV_CONTROL                       0
 #define RCV_CONTROL_GET(base)             IORD(base,RCV_CONTROL)
 #define RCV_CONTROL_SET(base,data)        IOWR(base,RCV_CONTROL,data)
 
@@ -80,7 +80,7 @@
 #define XMT_CONTROL_SEND_SET(data)        SET_FIELD_VALUE(XMT_CONTROL_SEND,data)
 
 #define XMT_CONTROL_BUSY_MASK             (0x1)
-#define XMT_CONTROL_BUSY_OFST             (3)
+#define XMT_CONTROL_BUSY_OFST             (15)
 #define XMT_CONTROL_BUSY_GET(data)        GET_FIELD_VALUE(XMT_CONTROL_BUSY,data)
 #define XMT_CONTROL_BUSY_SET(data)        SET_FIELD_VALUE(XMT_CONTROL_BUSY,data)
 
