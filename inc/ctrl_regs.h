@@ -8,6 +8,12 @@
 #define _SET_BITS(data,mask,offset)  ((data & mask) << offset)
 #define _GET_BITS(data,mask,offset)  ((data >> offset) & mask)
 
+#define GET_FIELD_VALUE(name,data)   _GET_BITS(data,name ## _MASK,name ## _OFST)
+#define SET_FIELD_VALUE(name,data)   _SET_BITS(data,name ## _MASK,name ## _OFST)
+
+//#define GET_REG_VALUE(name,base)      IORD(base,name)
+//#define SET_REG_VALUE(name,base,data) IOWR(base,name,data)
+
 #define CONTROL_REG                               0
 #define IORD_CONTROL_REG(base)                    IORD(base,CONTROL_REG)
 #define IOWR_CONTROL_REG(base,data)               IOWR(base,CONTROL_REG,data)

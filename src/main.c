@@ -3,23 +3,18 @@
 #include <stdlib.h>
 
 #include "ctrl_regs.h"
+#include "rcv.h"
 
 int main (){
 
-  // Switch to RT mode
-  //
-  // SET RT address
-  //
-  // Enable Receiver and Transmitter
-  //
+  // CONFIG MODE
+  // SET RT ADDRESS
+  // ENABLE RECEIVER AND TRANSMITTER
 
-  while(1){
-    // WAIT received message
-    //
-    // Parse message
-    //
-    // Process message
-  }
+  // START MESSAGE PROCESSOR UNIT
+  //rt_msg_processor();
+
+  printf("0x%d\n",RCV_CONTROL_REG_ENABLE_GET(0));
 
   return 0;
 }

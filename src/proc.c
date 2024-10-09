@@ -21,7 +21,7 @@ typedef struct {
   unsigned short  msg_data;
 } tx_msg_info_t;
 
-void msg_processor(){
+void rt_msg_processor(){
 
   rx_msg_info_t rx_msg_info;
   tx_msg_info_t tx_msg_info;
