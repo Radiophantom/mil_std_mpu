@@ -1,44 +1,80 @@
 
 #include "proc.h"
+#include <stdio.h>
+
+volatile unsigned char BROADCAST_FLAG;
+volatile unsigned char OP_DIR; // 0 - RECEIVE, 1 - TRANSMIT
+
+volatile unsigned short STATUS_WORD = 0x0000;
 
 void rt_msg_processor(unsigned short* BASE_ADDR) {
-
-  rx_msg_info_t main_msg_info;
 
   rx_msg_info_t rx_msg_info;
   tx_msg_info_t tx_msg_info;
 
   while(1){
 
-    get_rx_word(BASE_ADDR,&main_msg_info);
+    wait_rx_word(BASE_ADDR);
+    get_rx_word(BASE_ADDR,&rx_msg_info);
 
-    if(main_msg_info.cmd == 0){
+    unsigned short basic_status = BASIC_STATUS_GET(BASE_ADDR);
 
-      for(int i = 0; i < main_msg_info.words_cnt; i++ ){
+    if(rx_msg_info.rt_address == 31){
+      BROADCAST_FLAG = 1;
+    } else if(rx_msg_info.rt_address == BASIC_STATUS_RT_ADDR_GET(basic_status) ){
+      BROADCAST_FLAG = 0;
+    } else {
+      // SKIP in all other cases
+      continue;
+    }
+
+    unsigned short* rt_msg_table_addr  = RT_MSG_PTR_TABLE_ADDR_GET(BASE_ADDR);
+    unsigned short* cmd_msg_table_addr;
+
+    if((rx_msg_info.sub_address == 0 ) || \
+       (rx_msg_info.sub_address == 31)){
+      cmd_msg_table_addr = rt_msg_table_addr+64+rx_msg_info.sub_address*2;
+    } else if(rx_msg_info.cmd == 0){
+      cmd_msg_table_addr = rt_msg_table_addr+0+rx_msg_info.sub_address*2;
+    } else {
+      cmd_msg_table_addr = rt_msg_table_addr+32+rx_msg_info.sub_address*2;
+    }
+
+    if(rx_msg_info.cmd == 0){
+
+      OP_DIR = 0;
+
+      for(int i = 0; i < rx_msg_info.words_cnt; i++ ){
+        wait_rx_word(BASE_ADDR);
         get_rx_word(BASE_ADDR,&rx_msg_info);
+        // 
       }
 
-      tx_msg_info.msg_type  = 0x1;
-      tx_msg_info.data      = (main_msg_info.rt_address << 11);
+      tx_msg_info.msg_type  = 0x0;
+      tx_msg_info.data      = STATUS_WORD;
 
       send_tx_word(BASE_ADDR,&tx_msg_info);
+      wait_tx_word(BASE_ADDR);
 
     } else {
 
-      tx_msg_info.msg_type  = 0x1;
-      tx_msg_info.data      = (main_msg_info.rt_address << 11);
+      OP_DIR = 1;
+
+      tx_msg_info.msg_type  = 0x0;
+      tx_msg_info.data      = STATUS_WORD;
 
       send_tx_word(BASE_ADDR,&tx_msg_info);
-
-      unsigned short tx_data = 0xFF;
+      wait_tx_word(BASE_ADDR);
 
       for(int i = 0; i < main_msg_info.words_cnt; i++){
-        tx_msg_info.msg_type  = 0x0;
+        //
+        tx_msg_info.msg_type  = 0x1;
         tx_msg_info.data      = tx_data--;
         send_tx_word(BASE_ADDR,&tx_msg_info);
       }
     }
   }
+
 }
 
 ////typedef struct {

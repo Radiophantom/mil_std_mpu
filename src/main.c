@@ -15,7 +15,7 @@ int main (){
   // ENABLE RECEIVER AND TRANSMITTER
 
   // LAUNCH MESSAGE PROCESSOR UNIT
-  //rt_msg_processor((unsigned short*)MIL_STD_CONTROLLER_BASE);
+  rt_msg_processor((unsigned short*)MIL_STD_CONTROLLER_BASE);
 
   return 0;
 }
