@@ -1,11 +1,13 @@
 
-#include "proc.h"
-#include <stdio.h>
+#include "ctrl_regs.h"
+#include "mil_std.h"
 
 volatile unsigned char BROADCAST_FLAG;
 volatile unsigned char OP_DIR; // 0 - RECEIVE, 1 - TRANSMIT
 
 volatile unsigned short STATUS_WORD = 0x0000;
+
+volatile unsigned short RESPONSE_SUPPRES = 0;
 
 void rt_msg_processor(unsigned short* BASE_ADDR) {
 

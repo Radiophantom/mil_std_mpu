@@ -2,19 +2,14 @@
 #ifndef __CONTROL_REGS_H__
 #define __CONTROL_REGS_H__
 
-#define IORD(base,addr)       (*(unsigned short*)(base+addr))
-#define IOWR(base,addr,data)  (*(unsigned short*)(base+addr) = data)
+#include "io.h"
 
-#define _SET_BITS(data,mask,offset)  ((data & mask) << offset)
-#define _GET_BITS(data,mask,offset)  ((data >> offset) & mask)
-
-#define GET_FIELD_VALUE(name,data)   _GET_BITS(data,name ## _MASK,name ## _OFST)
-#define SET_FIELD_VALUE(name,data)   _SET_BITS(data,name ## _MASK,name ## _OFST)
+#define CSR_BASE_ADDR 0x60000
 
 // RW
 #define CONTROL                                   0
-#define CONTROL_GET(base)                         IORD(base,CONTROL)
-#define CONTROL_SET(base,data)                    IOWR(base,CONTROL,data)
+#define CONTROL_GET()                             IORD(CSR_BASE_ADDR,CONTROL)
+#define CONTROL_SET(data)                         IOWR(CSR_BASE_ADDR,CONTROL,data)
 
 #define CONTROL_IRE_MASK                          (0x1)
 #define CONTROL_IRE_OFST                          (7)
@@ -22,12 +17,12 @@
 #define CONTROL_IRE_SET(data)                     SET_FIELD_VALUE(CONTROL_IRE,data)
 
 #define RT_MSG_PTR_TABLE_ADDR                     1
-#define RT_MSG_PTR_TABLE_ADDR_GET(base)           IORD(base,RT_MSG_PTR_TABLE_ADDR)
-#define RT_MSG_PTR_TABLE_ADDR_SET(base,data)      IOWR(base,RT_MSG_PTR_TABLE_ADDR,data)
+#define RT_MSG_PTR_TABLE_ADDR_GET()               IORD(CSR_BASE_ADDR,RT_MSG_PTR_TABLE_ADDR)
+#define RT_MSG_PTR_TABLE_ADDR_SET(data)           IOWR(CSR_BASE_ADDR,RT_MSG_PTR_TABLE_ADDR,data)
 
 #define BASIC_STATUS                              2
-#define BASIC_STATUS_GET(base)                    IORD(base,BASIC_STATUS)
-#define BASIC_STATUS_SET(base,data)               IOWR(base,BASIC_STATUS,data)
+#define BASIC_STATUS_GET()                        IORD(CSR_BASE_ADDR,BASIC_STATUS)
+#define BASIC_STATUS_SET(data)                    IOWR(CSR_BASE_ADDR,BASIC_STATUS,data)
 
 #define BASIC_STATUS_ME_MASK                      (0x1)
 #define BASIC_STATUS_ME_OFST                      (10)
@@ -40,8 +35,8 @@
 #define BASIC_STATUS_RT_ADDR_SET(data)            SET_FIELD_VALUE(BASIC_STATUS_RT_ADDR,data)
 
 #define CONFIG_REG1                               9
-#define CONFIG_REG1_GET(base)                     IORD(base,CONFIG_REG1)
-#define CONFIG_REG1_SET(base,data)                IOWR(base,CONFIG_REG1,data)
+#define CONFIG_REG1_GET()                         IORD(CSR_BASE_ADDR,CONFIG_REG1)
+#define CONFIG_REG1_SET(data)                     IOWR(CSR_BASE_ADDR,CONFIG_REG1,data)
 
 /*
 #define INTERRUPT_MASKL_REG                     3
