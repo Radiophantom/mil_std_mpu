@@ -1,20 +1,20 @@
 
 #include <rcv.h>
 
-void wait_rx_word(unsigned short* BASE_ADDR){
+void wait_rx_word(){
   // Polling of RCV word valid bit
   while(1){
-    unsigned short irq_vector_reg = RCV_IRQ_VECTOR_GET(BASE_ADDR);
+    unsigned short irq_vector_reg = RCV_IRQ_VECTOR_GET();
     if(RCV_IRQ_VECTOR_RCV_GET(irq_vector_reg))
       break;
   }
 }
 
-void get_rx_word(unsigned short* BASE_ADDR, rx_msg_info_t* msg_info) {
+void get_rx_word(rx_msg_info_t* msg_info) {
 
-  unsigned short data_word_reg    = RCV_DATA_WORD_GET(BASE_ADDR);
-  unsigned short data_status_reg  = RCV_DATA_STATUS_GET(BASE_ADDR);
-  //unsigned short data_errors_reg  = RCV_DATA_ERRORS_GET(BASE_ADDR);
+  unsigned short data_word_reg    = RCV_DATA_WORD_GET();
+  unsigned short data_status_reg  = RCV_DATA_STATUS_GET();
+  unsigned short data_errors_reg  = RCV_DATA_ERRORS_GET();
 
   msg_info -> msg_type    = (data_status_reg  >> 0 ) & 0x01;
   msg_info -> rt_address  = (data_word_reg    >> 11) & 0x1F;
