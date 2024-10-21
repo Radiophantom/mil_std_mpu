@@ -18,5 +18,7 @@
 
 void rt_msg_processor();
 
+void set_watchdog_us(int us);
+
 #endif
 

@@ -2,6 +2,10 @@
 #include "ctrl_regs.h"
 #include "mil_std.h"
 
+void set_watchdog_us(int us){
+  // USE BSP to launch watchdog
+}
+
 volatile unsigned char BROADCAST_FLAG;
 volatile unsigned char OP_DIR; // 0 - RECEIVE, 1 - TRANSMIT
 
@@ -25,31 +29,18 @@ void transmit_fsm () {
       IDLE_S;
 }
 
-int mode_code_valid() {
-  if((mode_code <= 8) && (cmd == 1))
-    return 1;
-  if((mode_code == 16 && cmd == ) || (mode_code 
-}
-
-int mode_code_no_data() {
-  if(mode_code <= 47)
-    return 1;
-  return 0;
-}
-
-int mode_code_reserved () {
-  if((mode_code > 40) && (mode_code < 48))
-    return 1;
-  if((
-    return 
-}
-
 void mode_code_fsm () {
 
+  int mode_code_op = mode_code_valid(mcode);
+
+  if(mode_code_op == -1)
+    // DO STUFF
+    SKIP_S;
+
   MODE_CODE_S:
-    if(mode_code_no_data)
+    if(mode_code_op & EXTRA_DATA)
       // DO STUFF
-      if(broadcast)
+      if(mode_code_op & BROADCAST)
         IDLE_S;
       else
         WAIT_S;
@@ -136,18 +127,22 @@ void main_fsm () {
 
 }
 
+volatile rx_msg_info_t rx_msg_info;
+volatile tx_msg_info_t tx_msg_info;
 
-void rt_msg_processor() {
+volatile rx_msg_flag;
+volatile tx_msg_flag;
 
-  rx_msg_info_t rx_msg_info;
-  tx_msg_info_t tx_msg_info;
+void msg_processor_unit() {
 
   while(1){
 
-    wait_rx_word();
-    get_rx_word(&rx_msg_info);
+    if!(rx_msg_flag || tx_msg_flag){
+      nop;
 
-    unsigned short basic_status = BASIC_STATUS_GET();
+    if(rx_msg_flag || tx_msg_flag){
+
+    next_fsm_state = get_next_fsm_state();
 
     if(rx_msg_info.rt_address == 31){
       BROADCAST_FLAG = 1;
