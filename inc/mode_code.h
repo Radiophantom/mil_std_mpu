@@ -1,0 +1,22 @@
+
+#ifndef __MODE_CODE_H__
+#define __MODE_CODE_H__
+
+#define CMD_DYNAMIC_BUS_CONTROL                 0x400
+#define CMD_SYNCHRONIZE                         0x401
+#define CMD_TRANSMIT_STATUS_WORD                0x402
+#define CMD_INITIATE_SELF_TEST                  0x403
+#define CMD_TRANSMITTER_SHUTDOWN                0x404
+#define CMD_OVERRIDE_TRANSMITTER_SHUTDOWN       0x405
+#define CMD_INHIBIT_TERMINAL_FLAG_BIT           0x406
+#define CMD_OVERRIDE_INHIBIT_TERMINAL_FLAG_BIT  0x407
+#define CMD_RESET_REMOTE_TERMINAL               0x408
+#define CMD_TRANSMIT_VECTOR_WORD                0x410
+#define CMD_SYNCHRONIZE_WITH_DATA_WORD          0x011
+#define CMD_TRANSMIT_LAST_COMMAND_WORD          0x412
+#define CMD_TRANSMIT_BUILT_IN_TEST_WORD         0x413
+#define CMD_SELECTED_TRANSMITTER                0x014
+#define CMD_OVERRIDE_SELECTED_TRANSMITTER       0x015
+
+#endif
+
