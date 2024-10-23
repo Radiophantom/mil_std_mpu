@@ -43,5 +43,21 @@ int mode_code_valid(int mode_code) {
   return -1;
 }
 
+void do_cmd_dynamic_bus_control();
+void do_cmd_synchronize();
+void do_cmd_transmit_status_word();
+void do_cmd_initiate_self_test();
+void do_cmd_transmitter_shutdown();
+void do_cmd_override_transmitter_shutdown();
+void do_cmd_inhibit_terminal_flag_bit();
+void do_cmd_override_inhibit_terminal_flag_bit();
+void do_cmd_reset_remote_terminal();
+void do_cmd_transmit_vector_word();
+void do_cmd_synchronize_with_data_word();
+void do_cmd_transmit_last_command_word();
+void do_cmd_transmit_built_in_test_word();
+void do_cmd_selected_transmitter();
+void do_cmd_override_selected_transmitter();
+
 #endif
 
