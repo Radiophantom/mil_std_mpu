@@ -1,6 +1,16 @@
 
 #include "xmt.h"
 
+int tx_word_empty(){
+  return (XMT_IRQ_VECTOR_TRS_GET(XMT_IRQ_VECTOR_GET()) == 0);
+}
+
+void send_tx_word(unsigned short cmd,unsigned short data){
+  XMT_DATA_WORD_SET(data);
+  XMT_DATA_STATUS_SET(XMT_DATA_STATUS_SYNC_C_SET(cmd)); 
+  XMT_IRQ_VECTOR_SET(XMT_IRQ_VECTOR_TRS_SET(1));
+}
+
 void ERROR() {
 }
 

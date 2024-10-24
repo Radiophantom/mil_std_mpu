@@ -1,6 +1,20 @@
 
 #include "rcv.h"
 
+int rx_word_available(){
+  return RCV_IRQ_VECTOR_RCV_GET(RCV_IRQ_VECTOR_GET());
+}
+
+void rx_word_accepted(){
+  RCV_IRQ_VECTOR_SET(0);
+}
+
+void get_rx_word(rx_msg_info_t* msg_info){
+  msg_info -> word    = RCV_DATA_WORD_GET();
+  msg_info -> status  = RCV_DATA_STATUS_GET();
+  msg_info -> errors  = RCV_DATA_ERRORS_GET();
+}
+
 void ERROR(){
 }
 
