@@ -5,43 +5,67 @@ int tx_word_empty(){
   return (XMT_IRQ_VECTOR_TRS_GET(XMT_IRQ_VECTOR_GET()) == 0);
 }
 
-void send_tx_word(unsigned short cmd,unsigned short data){
+void send_tx_word(uint16_t cmd,uint16_t data){
   XMT_DATA_WORD_SET(data);
   XMT_DATA_STATUS_SET(XMT_DATA_STATUS_SYNC_C_SET(cmd)); 
   XMT_IRQ_VECTOR_SET(XMT_IRQ_VECTOR_TRS_SET(1));
 }
 
-void ERROR() {
-}
+void transmit_fsm(){
 
-short tx_buf [32];
+  int timestamp = get_timestamp_counter();
 
-State transmit_fsm () {
+  lock_xmt_msg_table();
 
-  switch(current_state){
+  uint16_t* rt_msg_table_addr   = (uint16_t*)RT_MSG_PTR_TABLE_ADDR_GET();
+  uint16_t* cmd_msg_table_addr  = rt_msg_table_addr+64+(rx_msg_info.word & SUB_ADDR_MASK);
 
-    TRANSMIT_S:
-      tx_buf_ptr = 0;
-      return SEND_RESPONSE_S;
+  int broadcast = BROADCAST_MSG(rx_msg_info.word);
+  int words_cnt = (rx_msg_info.word & WORD_COUNT_MASK);
 
-    TRANSMIT_DATA_S:
-      tx_msg_info.msg_type  = 0x1;
-      tx_msg_info.data      = tx_buf[tx_buf_ptr++];
-      send_tx_word(&tx_msg_info);
-      if(rx_msg_info.words == tx_buf_ptr)
-        // DO STUFF
-        return IDLE_S;
-      return TRANSMIT_DATA_S;
+  if(broadcast)
+    // Reset transaction
+    return;
+
+  if(words_cnt == 0)
+    words_cnt = 32;
+
+  response_gap();
+
+  send_tx_word(0,STATUS_WORD);
+
+  while(tx_word_empty() == 0){
+    // NOP
   }
+
+  if(SEND_TX_TIMESTAMP){
+    send_tx_word(1,timestamp & 0xFFFF);
+    while(tx_word_empty() == 0){
+      // NOP
+    }
+    send_tx_word(1,timestamp >> 16);
+    while(tx_word_empty() == 0){
+      // NOP
+    }
+  }
+
+  for(int i = 0; i < words_cnt;i++){
+    send_tx_word(1,*(cmd_msg_table_addr+3+i));
+    while(tx_word_empty() == 0){
+      // NOP
+    }
+  }
+
+  update_xmt_msg_table();
+
 }
 
-void do_transmit(){
+void update_xmt_msg_table(){
+  // Set 'update' bit and 'words cnt'
+  // Reset 'lock' bit
+}
 
-  unsigned short* rt_msg_table_addr;
-  unsigned short* cmd_msg_table_addr;
-
-  rt_msg_table_addr  = (unsigned short*)RT_MSG_PTR_TABLE_ADDR_GET();
-  cmd_msg_table_addr = rt_msg_table_addr+64+(rx_msg_info.word & SUB_ADDR_MASK);
-
+void lock_xmt_msg_table(){
+  // Set 'lock' bit
 }
 

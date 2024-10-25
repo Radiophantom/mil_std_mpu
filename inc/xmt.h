@@ -6,11 +6,11 @@
 #include "mil_std.h"
 
 typedef struct {
-  unsigned char   msg_type;
-  unsigned short  data;
+  uint8_t   msg_type;
+  uint16_t  data;
 } tx_msg_info_t;
 
-void send_tx_word(unsigned short* BASE_ADDR, tx_msg_info_t* msg_info);
+void send_tx_word(uint16_t* BASE_ADDR, tx_msg_info_t* msg_info);
 
 #endif
 

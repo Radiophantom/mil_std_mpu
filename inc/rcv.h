@@ -6,53 +6,26 @@
 #include "mil_std.h"
 
 typedef struct {
-  unsigned short data_status;
-  unsigned short data_word;
-  unsigned short data_errors;
+  uint16_t word;
+  uint16_t status;
+  uint16_t errors;
 } rx_msg_info_t;
 
-typedef struct {
-  unsigned char   rt_address;
-  unsigned char   cmd; // 0 - RECEIVE, 1 - TRANSMIT
-  unsigned char   sub_address;
-  unsigned char   words_cnt;
-} rx_cmd_t;
+#define RX_MSG_TABLE_SIZE_MASK    (0x3F)
+#define RX_MSG_TABLE_SIZE_OFST    (0)
 
-typedef struct {
-  unsigned char   rt_address;
-  unsigned char   cmd; // 0 - RECEIVE, 1 - TRANSMIT
-  unsigned char   sub_address;
-  unsigned char   mode_code;
-} rx_mode_code_t;
+#define RX_MSG_TABLE_INDX_MASK    (0x3F)
+#define RX_MSG_TABLE_INDX_OFST    (8)
 
-typedef struct {
-  unsigned short  data;
-} rx_data_t;
+#define RX_MSG_TABLE_LOCK         (1<<7)
+#define RX_MSG_TABLE_TIMESTAMP    (1<<14)
+#define RX_MSG_TABLE_INDX_UPDATE  (1<<15)
 
-typedef struct {
-  unsigned char   msg_type;
-  unsigned char   rt_address;
-  unsigned char   cmd; // 0 - RECEIVE, 1 - TRANSMIT
-  unsigned char   sub_address;
-  unsigned char   words_cnt;
-  unsigned short  data;
-} rx_msg_info_t;
-
-void get_rx_word(unsigned short* BASE_ADDR, rx_msg_info_t* msg_info);
-
-//typedef struct {
-//  unsigned char   msg_type;
-//  unsigned char   rt_address;
-//  unsigned char   cmd; // 0 - RECEIVE, 1 - TRANSMIT
-//  unsigned char   sub_address;
-//  unsigned char   words_cnt;
-//  unsigned char   broadcast;
-//  unsigned char   unicast;
-//  unsigned char   mode_code;
-//  unsigned char   mode_code_err;
-//  unsigned char   mode_code_wdata;
-//  unsigned int    timestamp;
-//} rx_msg_info_t;
+#define RX_DATA_TABLE_OVW         (1<<5)
+#define RX_DATA_TABLE_INVALID     (1<<6)
+#define RX_DATA_TABLE_LOCK        (1<<7)
+#define RX_DATA_TABLE_IRQ         (1<<12)
+#define RX_DATA_TABLE_BCST        (1<<13)
+#define RX_DATA_TABLE_UPDATE      (1<<15)
 
 #endif
-
