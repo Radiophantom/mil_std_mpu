@@ -45,11 +45,11 @@ uint32_t get_timestamp_counter(){
   return 0x01234567;
 }
 
-void receive_fsm(){
+void receive_msg(){
 
   uint32_t timestamp = get_timestamp_counter();
 
-  uint16_t* subaddr_table_addr = (uint16_t*)(RT_MSG_PTR_TABLE_ADDR_GET()<<1)+RCV_BASE_INDX+(rx_msg_info.word & SUB_ADDR_MASK);
+  uint16_t* subaddr_table_addr = (uint16_t*)(RT_MSG_PTR_TABLE_ADDR_GET()<<1)+RCV_BASE_INDX+((rx_msg_info.word & SUB_ADDR_MASK)>>SUB_ADDR_OFST);
 
   if(*subaddr_table_addr == 0x0)
     return;
@@ -63,7 +63,7 @@ void receive_fsm(){
     return;
   }
 
-  lock_rcv_pointer_table();
+  lock_pointer_table(pointer_table_addr);
 
   uint16_t data_table_indx = (*pointer_table_addr & RX_MSG_TABLE_INDX_MASK) >> RX_MSG_TABLE_INDX_OFST;
 
@@ -96,7 +96,7 @@ void receive_fsm(){
     }
 
     if(rx_msg_info.status == DATA_WORD)
-      *(cmd_msg_table_addr + 3 + i) = data;
+      *(data_table_addr + 3 + i) = data;
       i++;
     else
       // TODO: Check if RT-RT no sending to itself
@@ -109,8 +109,9 @@ void receive_fsm(){
   }
 
   if(broadcast){
-    *(cmd_msg_table_addr
-    update_rcv_msg_table();
+    set_data_table_bcst(data_table_addr);
+    set_data_table_words(words_cnt);
+    set_data_table_update(data_table_addr);
     return;
   }
 
@@ -122,24 +123,65 @@ void receive_fsm(){
     // NOP
   }
 
-  update_rcv_msg_table();
+  set_data_table_words(words_cnt);
+  set_data_table_update(data_table_addr);
 
 }
 
-void lock_rcv_pointer_table(){
+void lock_pointer_table(uint16_t* pointer_table_addr){
   *pointer_table_addr = (*pointer_table_addr | RX_MSG_TABLE_LOCK);
 }
 
-void unlock_rcv_pointer_table(){
+void unlock_pointer_table(uint16_t* pointer_table_addr){
   *pointer_table_addr = (*pointer_table_addr & ~(RX_MSG_TABLE_LOCK));
 }
 
-void update_rcv_msg_table(){
-  // Set 'update' bit and 'words cnt'
-  // Reset 'lock' bit
+void generate_data_table_irq(){
+  // Check if IRQ can be generated - FIFO not overflow.
+  // Write to IRQ fifo. Check fifo overflow and so on.
 }
 
-void lock_rcv_msg_table(){
-  // Set 'lock' bit
+void set_data_table_update(uint16_t* data_table_addr){
+  *data_table_addr = (*data_table_addr | RX_DATA_TABLE_UPDATE);
+}
+
+void reset_data_table_update(uint16_t* data_table_addr){
+  *data_table_addr = (*data_table_addr & ~(RX_DATA_TABLE_UPDATE));
+}
+
+void set_data_table_invalid(uint16_t* data_table_addr){
+  *data_table_addr = (*data_table_addr | RX_DATA_TABLE_INVALID);
+}
+
+void reset_data_table_invalid(uint16_t* data_table_addr){
+  *data_table_addr = (*data_table_addr & ~(RX_DATA_TABLE_INVALID));
+}
+
+void set_data_table_bcst(uint16_t* data_table_addr){
+  *data_table_addr = (*data_table_addr | RX_DATA_TABLE_BCST);
+}
+
+void reset_data_table_bcst(uint16_t* data_table_addr){
+  *data_table_addr = (*data_table_addr & ~(RX_DATA_TABLE_BCST));
+}
+
+void set_data_table_ovw(uint16_t* data_table_addr){
+  *data_table_addr = (*data_table_addr | RX_DATA_TABLE_OVW);
+}
+
+void reset_data_table_ovw(uint16_t* data_table_addr){
+  *data_table_addr = (*data_table_addr & ~(RX_DATA_TABLE_OVW));
+}
+
+void set_data_table_words(uint16_t* data_table_addr,uint8_t word_count){
+  *data_table_addr = (*data_table_addr | word_count);
+}
+
+void lock_data_table(uint16_t* data_table_addr){
+  *data_table_addr = (*data_table_addr | RX_DATA_TABLE_LOCK);
+}
+
+void unlock_data_table(uint16_t* data_table_addr){
+  *data_table_addr = (*data_table_addr & ~(RX_DATA_TABLE_LOCK));
 }
 
