@@ -1,84 +1,56 @@
 
-#include "rcv.h"
+#include "ctrl_regs.h"
+#include "mil_std.h"
+#include "proc.h"
 
-#define SUCCESS       0
-#define TIMEOUT_ERROR 1
+void receive_msg(rx_word_t* rx_word){
 
-int rx_word_empty(){
-  return (RCV_IRQ_VECTOR_RCV_GET(RCV_IRQ_VECTOR_GET()) == 0);
-}
+  uint16_t* pointer_table_addr;
+  uint16_t* msg_table_addr;
+  uint16_t* data_table_addr;
 
-// FIXME: Timeout in 'ticks', not 'ns' for debug purposes
-// Return values: 0 - success
-//                1 - timeout error
-int get_rx_word(rx_msg_info_t* msg_info,uint32_t timeout_ns){
-  while(rx_word_empty()){
-    if(timeout_ns-- == 0)
-      return TIMEOUT_ERROR;
-  }
-  msg_info -> word    = RCV_DATA_WORD_GET();
-  msg_info -> status  = RCV_DATA_STATUS_GET();
-  msg_info -> errors  = RCV_DATA_ERRORS_GET();
-  RCV_IRQ_VECTOR_SET(0);
-  return SUCCESS;
-}
+  uint32_t timestamp;
+  uint16_t data_table_size;
+  uint16_t data_table_indx;
 
-int min_inter_msg_gap_timeout(){
-  return 0;
-}
+  int      broadcast;
+  uint8_t  words_cnt;
 
-int min_response_gap_timeout(){
-  return 0;
-}
+  timestamp = get_timestamp_counter();
 
-int max_response_gap_timeout(){
-  return 0;
-}
-
-void response_gap(int us){
-  while(us--){
-    // NOP
-  }
-}
-
-uint32_t get_timestamp_counter(){
-  return 0x01234567;
-}
-
-void receive_msg(){
-
-  uint32_t timestamp = get_timestamp_counter();
-
-  uint16_t* subaddr_table_addr = (uint16_t*)(RT_MSG_PTR_TABLE_ADDR_GET()<<1)+RCV_BASE_INDX+((rx_msg_info.word & SUB_ADDR_MASK)>>SUB_ADDR_OFST);
-
-  if(*subaddr_table_addr == 0x0)
+  if(((rx_word -> word_data & RT_ADDR_MASK) != BROADCAST_ADDR) && 
+     ((rx_word -> word_data & RT_ADDR_MASK) != (BASIC_STATUS_GET() & RT_ADDR_MASK)))
+    // Ignore message and suppress response
     return;
 
-  uint16_t* pointer_table_addr  = (uint16_t*)(*subaddr_table_addr << 1);
+  pointer_table_addr = (uint16_t*)(RT_MSG_PTR_TABLE_ADDR_GET()<<1)+RCV_BASE_INDX+((rx_word -> word_data & SUB_ADDR_MASK)>>SUB_ADDR_OFST);
+  if(*pointer_table_addr == 0x0)
+    // Ignore message and suppress response
+    return;
 
-  uint16_t data_table_size = (*pointer_table_addr & RX_MSG_TABLE_SIZE_MASK) >> RX_MSG_TABLE_SIZE_OFST;
+  msg_table_addr = (uint16_t*)(*pointer_table_addr << 1);
 
+  msg_table_lock(msg_table_addr);
+
+  data_table_size = (*msg_table_addr & MSG_TABLE_SIZE) >> MSG_TABLE_SIZE_OFST;
   if(data_table_size == 0x0){
-    // TODO: What to do?
-    return;
+    // TODO: Means virgin data set. So always should be minimum 1 data table if pointer is ON ???
+    data_table_indx = 0;
+  } else {
+    data_table_indx = (*msg_table_addr & MSG_TABLE_INDEX) >> MSG_TABLE_INDEX_OFST;
   }
-
-  lock_pointer_table(pointer_table_addr);
-
-  uint16_t data_table_indx = (*pointer_table_addr & RX_MSG_TABLE_INDX_MASK) >> RX_MSG_TABLE_INDX_OFST;
 
   data_table_indx++;
-
   if(data_table_indx > data_table_size){
     data_table_indx = 1;
   }
 
-  uint16_t* data_table_addr = (uint16_t*)(*pointer_table_addr << 1) + data_table_indx;
+  data_table_addr = (uint16_t*)(*msg_table_addr << 1) + data_table_indx;
 
-  *data_table_addr = (*data_table_addr | RX_DATA_TABLE_LOCK);
+  data_table_lock(data_table_addr);
 
-  int broadcast = BROADCAST_MSG(rx_msg_info.word);
-  int words_cnt = (rx_msg_info.word & WORD_COUNT_MASK);
+  broadcast = ((rx_word -> word_data & RT_ADDR_MASK) == BROADCAST_ADDR);
+  words_cnt = (rx_word -> word_data & WORD_COUNT_MASK);
 
   if(words_cnt == 0)
     words_cnt = 32;
@@ -86,102 +58,55 @@ void receive_msg(){
   *(data_table_addr+1) = ((timestamp >> 16) & 0xFFFF);
   *(data_table_addr+2) = ((timestamp >>  0) & 0xFFFF);
 
-  for(int i = 0; i < words_cnt;;){
+  //for(int i = 0; i < words_cnt;;){
+  for(int i = 0; i < words_cnt;){
 
-    get_rx_word(&rx_msg_info,4);
+    int ret = get_rx_word(rx_word,4);
 
-    if(rx_msg_info.errors){
-      // Reset transaction
+    if(ret == TIMEOUT_ERROR)
+      // TODO: Do timeout stuff and suppress response
+      return;
+
+    if(rx_word -> word_errors){
+      // TODO: Do error occured stuff and suppress response
       return;
     }
 
-    if(rx_msg_info.status == DATA_WORD)
-      *(data_table_addr + 3 + i) = data;
+    if(rx_word -> word_status == DATA_WORD){
+      *(data_table_addr+3+i) = rx_word -> word_data;
       i++;
-    else
+    } else
       // TODO: Check if RT-RT no sending to itself
-      if(rx_msg_info.word & DIR_MASK)
-        if(i == 0)
-          continue;
-        else
-          // Reset transaction
-          return;
+      // Skip just now, but implement later!!!
+      //if(rx_word.word & DIR_MASK)
+      //  if(i == 0)
+      //    continue;
+      //  else
+      //    // Reset transaction
+      //    return;
+      return;
   }
 
   if(broadcast){
-    set_data_table_bcst(data_table_addr);
-    set_data_table_words(words_cnt);
-    set_data_table_update(data_table_addr);
-    return;
+    goto finish;
   }
 
   response_gap(12);
 
-  send_tx_word(0,STATUS_WORD);
+  send_tx_word(0,BASIC_STATUS_GET());
 
   while(tx_word_empty() == 0){
     // NOP
   }
 
-  set_data_table_words(words_cnt);
-  set_data_table_update(data_table_addr);
+finish:
+  if(broadcast)
+    *data_table_addr = *data_table_addr | DATA_TABLE_BCST;
+  *data_table_addr = *data_table_addr | DATA_TABLE_UPDATE | (words_cnt & DATA_TABLE_WCNT);
+  *msg_table_addr  = *msg_table_addr  | data_table_indx;
+  data_table_unlock(data_table_addr);
+  msg_table_unlock(msg_table_addr);
 
-}
-
-void lock_pointer_table(uint16_t* pointer_table_addr){
-  *pointer_table_addr = (*pointer_table_addr | RX_MSG_TABLE_LOCK);
-}
-
-void unlock_pointer_table(uint16_t* pointer_table_addr){
-  *pointer_table_addr = (*pointer_table_addr & ~(RX_MSG_TABLE_LOCK));
-}
-
-void generate_data_table_irq(){
-  // Check if IRQ can be generated - FIFO not overflow.
-  // Write to IRQ fifo. Check fifo overflow and so on.
-}
-
-void set_data_table_update(uint16_t* data_table_addr){
-  *data_table_addr = (*data_table_addr | RX_DATA_TABLE_UPDATE);
-}
-
-void reset_data_table_update(uint16_t* data_table_addr){
-  *data_table_addr = (*data_table_addr & ~(RX_DATA_TABLE_UPDATE));
-}
-
-void set_data_table_invalid(uint16_t* data_table_addr){
-  *data_table_addr = (*data_table_addr | RX_DATA_TABLE_INVALID);
-}
-
-void reset_data_table_invalid(uint16_t* data_table_addr){
-  *data_table_addr = (*data_table_addr & ~(RX_DATA_TABLE_INVALID));
-}
-
-void set_data_table_bcst(uint16_t* data_table_addr){
-  *data_table_addr = (*data_table_addr | RX_DATA_TABLE_BCST);
-}
-
-void reset_data_table_bcst(uint16_t* data_table_addr){
-  *data_table_addr = (*data_table_addr & ~(RX_DATA_TABLE_BCST));
-}
-
-void set_data_table_ovw(uint16_t* data_table_addr){
-  *data_table_addr = (*data_table_addr | RX_DATA_TABLE_OVW);
-}
-
-void reset_data_table_ovw(uint16_t* data_table_addr){
-  *data_table_addr = (*data_table_addr & ~(RX_DATA_TABLE_OVW));
-}
-
-void set_data_table_words(uint16_t* data_table_addr,uint8_t word_count){
-  *data_table_addr = (*data_table_addr | word_count);
-}
-
-void lock_data_table(uint16_t* data_table_addr){
-  *data_table_addr = (*data_table_addr | RX_DATA_TABLE_LOCK);
-}
-
-void unlock_data_table(uint16_t* data_table_addr){
-  *data_table_addr = (*data_table_addr & ~(RX_DATA_TABLE_LOCK));
+  return;
 }
 

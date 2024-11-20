@@ -18,9 +18,6 @@
 #define CMD_SELECTED_TRANSMITTER                0x014 // Not implemented
 #define CMD_OVERRIDE_SELECTED_TRANSMITTER       0x015 // Not implemented
 
-#define BROADCAST  (1 << 0)
-#define EXTRA_DATA (1 << 1)
-
 // return value - [DATA + BROADCAST] bits.
 // Valid combinations [00;01;10;11].
 int mode_code_valid(int mode_code) {

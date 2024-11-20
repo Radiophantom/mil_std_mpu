@@ -1,36 +1,62 @@
 
+#include "proc.h"
 #include "xmt.h"
-
-int tx_word_empty(){
-  return (XMT_IRQ_VECTOR_TRS_GET(XMT_IRQ_VECTOR_GET()) == 0);
-}
-
-void send_tx_word(uint16_t cmd,uint16_t data){
-  XMT_DATA_WORD_SET(data);
-  XMT_DATA_STATUS_SET(XMT_DATA_STATUS_SYNC_C_SET(cmd)); 
-  XMT_IRQ_VECTOR_SET(XMT_IRQ_VECTOR_TRS_SET(1));
-}
 
 void transmit_fsm(){
 
-  int timestamp = get_timestamp_counter();
+  uint16_t* pointer_table_addr;
+  uint16_t* msg_table_addr;
+  uint16_t* data_table_addr;
 
-  lock_xmt_msg_table();
+  uint32_t timestamp;
+  uint16_t data_table_size;
+  uint16_t data_table_indx;
 
-  uint16_t* rt_msg_table_addr   = (uint16_t*)RT_MSG_PTR_TABLE_ADDR_GET();
-  uint16_t* cmd_msg_table_addr  = rt_msg_table_addr+64+(rx_msg_info.word & SUB_ADDR_MASK);
+  int      broadcast;
+  uint8_t  words_cnt;
 
-  int broadcast = BROADCAST_MSG(rx_msg_info.word);
-  int words_cnt = (rx_msg_info.word & WORD_COUNT_MASK);
+  timestamp = get_timestamp_counter();
 
-  if(broadcast)
-    // Reset transaction
+  if((rx_word.word_data & RT_ADDR_MASK) != BROADCAST_ADDR)
+    // Ignore message and suppress response
+    //return;
+  else if((rx_word.word_data & RT_ADDR_MASK) != (BASIC_STATUS_GET() & RT_ADDR_MASK))
+    // Ignore message and suppress response
     return;
+
+  pointer_table_addr = (uint16_t*)(RT_MSG_PTR_TABLE_ADDR_GET()<<1)+XMT_BASE_INDX+((rx_word.word_data & SUB_ADDR_MASK)>>SUB_ADDR_OFST);
+  if(*pointer_table_addr == 0x0)
+    // Ignore message and suppress response
+    return;
+
+  msg_table_addr = (uint16_t*)(*pointer_table_addr << 1);
+
+  msg_table_lock(msg_table_addr);
+
+  data_table_size = (*msg_table_addr & MSG_TABLE_SIZE_MASK) >> MSG_TABLE_SIZE_OFST;
+  if(data_table_size == 0x0){
+    // TODO: Means virgin data set. So always should be minimum 1 data table if pointer is ON ???
+    data_table_indx = 0;
+  } else {
+    data_table_indx = (*msg_table_addr & MSG_TABLE_INDX_MASK) >> MSG_TABLE_INDX_OFST;
+  }
+
+  data_table_indx++;
+  if(data_table_indx > data_table_size){
+    data_table_indx = 1;
+  }
+
+  data_table_addr = (uint16_t*)(*msg_table_addr << 1) + data_table_indx;
+
+  data_table_lock(data_table_addr);
+
+  broadcast = ((rx_word.word_data & RT_ADDR_MASK) == BROADCAST_ADDR);
+  words_cnt = (rx_word.word_data & WORD_COUNT_MASK);
 
   if(words_cnt == 0)
     words_cnt = 32;
 
-  response_gap();
+  response_gap(12);
 
   send_tx_word(0,STATUS_WORD);
 
@@ -56,16 +82,12 @@ void transmit_fsm(){
     }
   }
 
-  update_xmt_msg_table();
+  *data_table_addr = *data_table_addr & ~(DATA_TABLE_UPDATE);
+  *data_table_addr = *data_table_addr | DATA_TABLE_UPDATE | (words_cnt & DATA_TABLE_WCNT);
+  *msg_table_addr  = *msg_table_addr  | data_table_indx;
+  data_table_unlock(data_table_addr);
+  msg_table_unlock(msg_table_addr);
 
-}
-
-void update_xmt_msg_table(){
-  // Set 'update' bit and 'words cnt'
-  // Reset 'lock' bit
-}
-
-void lock_xmt_msg_table(){
-  // Set 'lock' bit
+  return;
 }
 

@@ -2,28 +2,50 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "ctrl_regs.h"
+#include "mil_std.h"
 #include "proc.h"
 
-#define MIL_STD_CONTROLLER_BASE 0x60000
+volatile rx_word_t rx_word;
+volatile tx_word_t tx_word;
 
 int main (){
 
-  // CONFIG MODE
-  //write(CFG1, UNDEFINED_MODE);
+  // Enable receiver and transmitter
+  RCV_CONTROL_SET(RCV_CONTROL_ENABLE);
+  XMT_CONTROL_SET(XMT_CONTROL_ENABLE);
 
-  // SET RT ADDRESS
-  //read(MIL_STD_RT_ADDR);
+  while(1){
 
-  // ENABLE RECEIVER AND TRANSMITTER
-  //write(MIL_STD_ENABLE, (1<<0) | (1<<1));
+    while(get_rx_word(&rx_word,10)){
+      // NOP
+    }
 
-  // Register some interrupts
-  //alt_irq_register(RESET_REG,reset_vector);
-  //alt_irq_register(MODE_REG,mode_vector);
+    if(rx_word.word_errors){
+      //TODO: Do some required stuff
+      ERROR();
+      continue;
+    }
 
-  // LAUNCH MESSAGE PROCESSOR UNIT
-  msg_processor_unit();
+    if(rx_word.word_status != COMMAND_WORD)
+      continue;
 
+    //if((rx_word.word_data & SUB_ADDR_MASK) == MODE_CODE_ADDR0)
+    //  mode_code_msg();
+    //else
+    //  if((rx_word.word_data & SUB_ADDR_MASK) == MODE_CODE_ADDR1)
+    //    mode_code_msg();
+    //  else
+        if(rx_word.word_data & DIR_MASK)
+          transmit_msg(&rx_word);
+        else
+          receive_msg(&rx_word);
+
+    // TODO: Add check inter-message gap timeout
+    //if(min_inter_msg_gap_timeout())
+      // Minimum timeout not hold!
+
+  }
   return 0;
 }
 
