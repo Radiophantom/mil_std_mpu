@@ -23,7 +23,11 @@ void receive_msg(rx_word_t* rx_word){
     // Ignore message and suppress response
     return;
 
-  pointer_table_addr = (uint16_t*)(RT_MSG_PTR_TABLE_ADDR_GET()<<1)+RCV_BASE_INDX+((rx_word -> word_data & SUB_ADDR_MASK)>>SUB_ADDR_OFST);
+  //void* p = (void*)(RT_MSG_PTR_TABLE_ADDR_GET() & 0xFFFF);
+  //pointer_table_addr = (uint16_t*)(p);
+
+  pointer_table_addr = (uint16_t*)(uintptr_t)(RT_MSG_PTR_TABLE_ADDR_GET() << 1);
+  pointer_table_addr += RCV_BASE_INDX+((rx_word -> word_data & SUB_ADDR_MASK)>>SUB_ADDR_OFST);
   if(*pointer_table_addr == 0x0)
     // Ignore message and suppress response
     return;
@@ -45,7 +49,7 @@ void receive_msg(rx_word_t* rx_word){
     data_table_indx = 1;
   }
 
-  data_table_addr = (uint16_t*)(*msg_table_addr << 1) + data_table_indx;
+  data_table_addr = (uint16_t*)((*msg_table_addr << 1) + data_table_indx);
 
   data_table_lock(data_table_addr);
 
@@ -95,14 +99,11 @@ void receive_msg(rx_word_t* rx_word){
 
   send_tx_word(0,BASIC_STATUS_GET());
 
-  while(tx_word_empty() == 0){
-    // NOP
-  }
-
 finish:
   if(broadcast)
-    *data_table_addr = *data_table_addr | DATA_TABLE_BCST;
-  *data_table_addr = *data_table_addr | DATA_TABLE_UPDATE | (words_cnt & DATA_TABLE_WCNT);
+    *data_table_addr = *data_table_addr | DATA_TABLE_BCST | DATA_TABLE_UPDATE | (words_cnt & DATA_TABLE_WCNT);
+  else
+    *data_table_addr = *data_table_addr | DATA_TABLE_UPDATE | (words_cnt & DATA_TABLE_WCNT);
   *msg_table_addr  = *msg_table_addr  | data_table_indx;
   data_table_unlock(data_table_addr);
   msg_table_unlock(msg_table_addr);

@@ -5,7 +5,7 @@
 #include "ctrl_regs.h"
 #include "mil_std.h"
 
-void send_tx_word(uint16_t* BASE_ADDR, tx_msg_info_t* msg_info);
+void transmit_msg(rx_word_t* rx_word);
 
 #endif
 

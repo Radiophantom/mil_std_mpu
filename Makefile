@@ -1,6 +1,7 @@
 
 CFLAGS=-c -Wall -I./inc
-OBJ=main.o proc.o rcv.o xmt.o
+OBJ=main.o proc.o rcv.o xmt.o mode_code.o
+#OBJ=main.o proc.o rcv.o xmt.o
 
 main_app: $(OBJ)
 	gcc $^ -o $@
@@ -15,6 +16,9 @@ xmt.o: src/xmt.c
 	gcc -c $^ -o $@ $(CFLAGS)
 
 proc.o: src/proc.c
+	gcc -c $^ -o $@ $(CFLAGS)
+
+mode_code.o: src/mode_code.c
 	gcc -c $^ -o $@ $(CFLAGS)
 
 clean:

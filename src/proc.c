@@ -39,15 +39,15 @@ int rx_word_empty(){
 // FIXME: Timeout in 'ticks', not 'ns' for debug purposes
 // Return values: 0 - success
 //                1 - timeout error
-int get_rx_word(rx_word_t* data_info,uint32_t timeout_ns){
+int get_rx_word(rx_word_t* rx_word,uint32_t timeout_ns){
   while(rx_word_empty()){
     if(timeout_ns-- == 0)
       return TIMEOUT_ERROR;
   }
-  data_info -> word_data    = RCV_DATA_WORD_GET();
-  data_info -> word_status  = RCV_DATA_STATUS_GET();
-  data_info -> word_errors  = RCV_DATA_ERRORS_GET();
-  RCV_IRQ_VECTOR_SET(0);
+  rx_word -> word_data    = RCV_DATA_WORD_GET();
+  rx_word -> word_status  = RCV_DATA_STATUS_GET();
+  rx_word -> word_errors  = RCV_DATA_ERRORS_GET();
+  RCV_IRQ_VECTOR_SET(RCV_IRQ_VECTOR_MSG_VALID);
   return SUCCESS;
 }
 

@@ -23,10 +23,15 @@ typedef struct {
 // Receive routines
 int rx_word_empty();
 int get_rx_word(rx_word_t* data_info,uint32_t timeout_ns);
+void receive_msg(rx_word_t* rx_word);
 
 // Transmit routines
 int tx_word_empty();
 void send_tx_word(uint16_t cmd,uint16_t data);
+void transmit_msg(rx_word_t* rx_word);
+
+// Mode code routines
+void mode_code_msg(rx_word_t* rx_word);
 
 // Processing routines
 void msg_table_lock(uint16_t* msg_table_addr);

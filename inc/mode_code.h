@@ -18,43 +18,43 @@
 #define CMD_SELECTED_TRANSMITTER                0x014 // Not implemented
 #define CMD_OVERRIDE_SELECTED_TRANSMITTER       0x015 // Not implemented
 
-// return value - [DATA + BROADCAST] bits.
-// Valid combinations [00;01;10;11].
-int mode_code_valid(int mode_code) {
-  switch(mode_code)
-    case CMD_DYNAMIC_BUS_CONTROL:                 return 0;
-    case CMD_SYNCHRONIZE:                         return (BROADCAST);
-    case CMD_TRANSMIT_STATUS_WORD:                return 0;
-    case CMD_INITIATE_SELF_TEST:                  return (BROADCAST);
-    case CMD_TRANSMITTER_SHUTDOWN:                return (BROADCAST);
-    case CMD_OVERRIDE_TRANSMITTER_SHUTDOWN:       return (BROADCAST);
-    case CMD_INHIBIT_TERMINAL_FLAG_BIT:           return (BROADCAST);
-    case CMD_OVERRIDE_INHIBIT_TERMINAL_FLAG_BIT:  return (BROADCAST);
-    case CMD_RESET_REMOTE_TERMINAL:               return (BROADCAST);
-    case CMD_TRANSMIT_VECTOR_WORD:                return (EXTRA_DATA);
-    case CMD_SYNCHRONIZE_WITH_DATA_WORD:          return (BROADCAST | EXTRA_DATA);
-    case CMD_TRANSMIT_LAST_COMMAND_WORD:          return (EXTRA_DATA);
-    case CMD_TRANSMIT_BUILT_IN_TEST_WORD:         return (EXTRA_DATA);
-    case CMD_SELECTED_TRANSMITTER:                return (BROADCAST | EXTRA_DATA);
-    case CMD_OVERRIDE_SELECTED_TRANSMITTER:       return (BROADCAST | EXTRA_DATA);
-  return -1;
-}
+//// return value - [DATA + BROADCAST] bits.
+//// Valid combinations [00;01;10;11].
+//int mode_code_valid(int mode_code) {
+//  switch(mode_code)
+//    case CMD_DYNAMIC_BUS_CONTROL:                 return 0;
+//    case CMD_SYNCHRONIZE:                         return (BROADCAST);
+//    case CMD_TRANSMIT_STATUS_WORD:                return 0;
+//    case CMD_INITIATE_SELF_TEST:                  return (BROADCAST);
+//    case CMD_TRANSMITTER_SHUTDOWN:                return (BROADCAST);
+//    case CMD_OVERRIDE_TRANSMITTER_SHUTDOWN:       return (BROADCAST);
+//    case CMD_INHIBIT_TERMINAL_FLAG_BIT:           return (BROADCAST);
+//    case CMD_OVERRIDE_INHIBIT_TERMINAL_FLAG_BIT:  return (BROADCAST);
+//    case CMD_RESET_REMOTE_TERMINAL:               return (BROADCAST);
+//    case CMD_TRANSMIT_VECTOR_WORD:                return (EXTRA_DATA);
+//    case CMD_SYNCHRONIZE_WITH_DATA_WORD:          return (BROADCAST | EXTRA_DATA);
+//    case CMD_TRANSMIT_LAST_COMMAND_WORD:          return (EXTRA_DATA);
+//    case CMD_TRANSMIT_BUILT_IN_TEST_WORD:         return (EXTRA_DATA);
+//    case CMD_SELECTED_TRANSMITTER:                return (BROADCAST | EXTRA_DATA);
+//    case CMD_OVERRIDE_SELECTED_TRANSMITTER:       return (BROADCAST | EXTRA_DATA);
+//  return -1;
+//}
 
-void do_cmd_dynamic_bus_control();
-void do_cmd_synchronize();
-void do_cmd_transmit_status_word();
-void do_cmd_initiate_self_test();
-void do_cmd_transmitter_shutdown();
-void do_cmd_override_transmitter_shutdown();
-void do_cmd_inhibit_terminal_flag_bit();
-void do_cmd_override_inhibit_terminal_flag_bit();
-void do_cmd_reset_remote_terminal();
-void do_cmd_transmit_vector_word();
-void do_cmd_synchronize_with_data_word();
-void do_cmd_transmit_last_command_word();
-void do_cmd_transmit_built_in_test_word();
-void do_cmd_selected_transmitter();
-void do_cmd_override_selected_transmitter();
+void do_cmd_dynamic_bus_control(){int a = 5;};
+void do_cmd_synchronize(){int a = 5;};
+void do_cmd_transmit_status_word(){int a = 5;};
+void do_cmd_initiate_self_test(){int a = 5;};
+void do_cmd_transmitter_shutdown(){int a = 5;};
+void do_cmd_override_transmitter_shutdown(){int a = 5;};
+void do_cmd_inhibit_terminal_flag_bit(){int a = 5;};
+void do_cmd_override_inhibit_terminal_flag_bit(){int a = 5;};
+void do_cmd_reset_remote_terminal(){int a = 5;};
+void do_cmd_transmit_vector_word(){int a = 5;};
+void do_cmd_synchronize_with_data_word(){int a = 5;};
+void do_cmd_transmit_last_command_word(){int a = 5;};
+void do_cmd_transmit_built_in_test_word(){int a = 5;};
+void do_cmd_selected_transmitter(){int a = 5;};
+void do_cmd_override_selected_transmitter(){int a = 5;};
 
 #endif
 

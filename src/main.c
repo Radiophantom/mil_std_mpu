@@ -1,15 +1,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
-#include "ctrl_regs.h"
-#include "mil_std.h"
 #include "proc.h"
-
-volatile rx_word_t rx_word;
-volatile tx_word_t tx_word;
+#include "rcv.h"
+#include "xmt.h"
 
 int main (){
+
+  rx_word_t rx_word;
 
   // Enable receiver and transmitter
   RCV_CONTROL_SET(RCV_CONTROL_ENABLE);
@@ -30,12 +30,12 @@ int main (){
     if(rx_word.word_status != COMMAND_WORD)
       continue;
 
-    //if((rx_word.word_data & SUB_ADDR_MASK) == MODE_CODE_ADDR0)
-    //  mode_code_msg();
-    //else
-    //  if((rx_word.word_data & SUB_ADDR_MASK) == MODE_CODE_ADDR1)
-    //    mode_code_msg();
-    //  else
+    if((rx_word.word_data & SUB_ADDR_MASK) == MODE_CODE_ADDR0)
+      mode_code_msg(&rx_word);
+    else
+      if((rx_word.word_data & SUB_ADDR_MASK) == MODE_CODE_ADDR1)
+        mode_code_msg(&rx_word);
+      else
         if(rx_word.word_data & DIR_MASK)
           transmit_msg(&rx_word);
         else
