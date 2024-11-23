@@ -30,12 +30,12 @@ int main (){
     if(rx_word.word_status != COMMAND_WORD)
       continue;
 
-    if((rx_word.word_data & SUB_ADDR_MASK) == MODE_CODE_ADDR0)
-      mode_code_msg(&rx_word);
-    else
-      if((rx_word.word_data & SUB_ADDR_MASK) == MODE_CODE_ADDR1)
-        mode_code_msg(&rx_word);
-      else
+    //if((rx_word.word_data & SUB_ADDR_MASK) == MODE_CODE_ADDR0)
+    //  mode_code_msg(&rx_word);
+    //else
+    //  if((rx_word.word_data & SUB_ADDR_MASK) == MODE_CODE_ADDR1)
+    //    mode_code_msg(&rx_word);
+    //  else
         if(rx_word.word_data & DIR_MASK)
           transmit_msg(&rx_word);
         else

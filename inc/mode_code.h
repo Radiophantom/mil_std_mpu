@@ -41,20 +41,22 @@
 //}
 
 void do_cmd_dynamic_bus_control(){int a = 5;};
-void do_cmd_synchronize(){int a = 5;};
 void do_cmd_transmit_status_word(){int a = 5;};
 void do_cmd_initiate_self_test(){int a = 5;};
 void do_cmd_transmitter_shutdown(){int a = 5;};
 void do_cmd_override_transmitter_shutdown(){int a = 5;};
 void do_cmd_inhibit_terminal_flag_bit(){int a = 5;};
 void do_cmd_override_inhibit_terminal_flag_bit(){int a = 5;};
-void do_cmd_reset_remote_terminal(){int a = 5;};
-void do_cmd_transmit_vector_word(){int a = 5;};
-void do_cmd_synchronize_with_data_word(){int a = 5;};
 void do_cmd_transmit_last_command_word(){int a = 5;};
 void do_cmd_transmit_built_in_test_word(){int a = 5;};
 void do_cmd_selected_transmitter(){int a = 5;};
 void do_cmd_override_selected_transmitter(){int a = 5;};
+
+// Must be implemented!
+void do_cmd_synchronize(){int a = 5;};
+void do_cmd_reset_remote_terminal(){int a = 5;};
+void do_cmd_transmit_vector_word(){int a = 5;};
+void do_cmd_synchronize_with_data_word(){int a = 5;};
 
 #endif
 

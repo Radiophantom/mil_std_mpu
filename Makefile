@@ -6,7 +6,8 @@ OBJ=main.o proc.o rcv.o xmt.o mode_code.o
 main_app: $(OBJ)
 	gcc $^ -o $@
 
-main.o: src/main.c
+#main.o: src/main.c
+main.o: src/main_fsm.c
 	gcc -c $^ -o $@ $(CFLAGS)
 
 rcv.o: src/rcv.c
