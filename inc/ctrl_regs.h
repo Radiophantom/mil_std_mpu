@@ -24,6 +24,8 @@
 #define BASIC_STATUS_GET()                        IORD(CSR_BASE_ADDR,BASIC_STATUS)
 #define BASIC_STATUS_SET(data)                    IOWR(CSR_BASE_ADDR,BASIC_STATUS,data)
 
+#define BASIC_STATUS_BUSY                         (0x1<<5)
+
 //#define BASIC_STATUS_ME_MASK                      (0x1)
 //#define BASIC_STATUS_ME_OFST                      (10)
 //#define BASIC_STATUS_ME_GET(data)                 GET_FIELD_VALUE(BASIC_STATUS_ME,data)
@@ -38,6 +40,18 @@
 //#define CONFIG_REG1_GET()                         IORD(CSR_BASE_ADDR,CONFIG_REG1)
 //#define CONFIG_REG1_SET(data)                     IOWR(CSR_BASE_ADDR,CONFIG_REG1,data)
 
+#define RTC_HIGH_WORD                             5
+#define RTC_HIGH_WORD_GET()                       IORD(CSR_BASE_ADDR,RTC_HIGH_WORD)
+#define RTC_HIGH_WORD_SET(data)                   IOWR(CSR_BASE_ADDR,RTC_HIGH_WORD,data)
+
+#define RTC_LOW_WORD                              6
+#define RTC_LOW_WORD_GET()                        IORD(CSR_BASE_ADDR,RTC_LOW_WORD)
+#define RTC_LOW_WORD_SET(data)                    IOWR(CSR_BASE_ADDR,RTC_LOW_WORD,data)
+
+#define RTC_CONTROL                               7
+#define RTC_CONTROL_GET()                         IORD(CSR_BASE_ADDR,RTC_CONTROL)
+#define RTC_CONTROL_SET(data)                     IOWR(CSR_BASE_ADDR,RTC_CONTROL,data)
+
 /*
 #define INTERRUPT_MASKL_REG                     3
 #define INTERRUPT_VECTORH_REG                   3
@@ -45,9 +59,6 @@
 #define INTERRUPT_VECTORL_REG                   4
 #define AUX_VECTORH_REG                         4
 #define CONFIG2H_REG                            4
-#define RTC_HIGH_WORD_REG                       5
-#define RTC_LOW_WORD_REG                        6
-#define RTC_CONTROL_REG                         7
 #define READ_FIFO_REG                           8
 #define RESET_FIFO_REG                          8
 #define BC_CUR_MJR_MNR_FRM_INDX_REG             10

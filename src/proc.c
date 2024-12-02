@@ -13,7 +13,7 @@ void response_gap(uint32_t ns){
 }
 
 uint32_t get_timestamp_counter(){
-  return 0x01234567;
+  return ((RTC_HIGH_WORD_GET() << 16) | RTC_LOW_WORD_GET());
 }
 
 void msg_table_lock(uint16_t* msg_table_addr){

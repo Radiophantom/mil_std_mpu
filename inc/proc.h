@@ -84,8 +84,8 @@ void ERROR();
 #define MODE_CODE_ADDR0     ( 0<<SUB_ADDR_OFST)
 #define MODE_CODE_ADDR1     (31<<SUB_ADDR_OFST)
 
-#define COMMAND_WORD        (0x0)
-#define DATA_WORD           (0x1)
+#define COMMAND_WORD        (0x1)
+#define DATA_WORD           (0x0)
 
 #define RCV_BASE_INDX   0
 #define XMT_BASE_INDX   32
